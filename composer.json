@@ -1,0 +1,46 @@
+{
+  "name": "youvision/think-response",
+  "description": "为 ThinkPHP 8 API 项目提供规范统一的响应数据结构",
+  "type": "library",
+  "license": "Apache-2.0",
+  "keywords": [
+    "thinkphp",
+    "response",
+    "api",
+    "json"
+  ],
+  "require": {
+    "php": ">=8.0",
+    "ext-json": "*",
+    "topthink/framework": "^8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Youvision\\ThinkResponse\\": "src/"
+    },
+    "files": [
+      "src/helper.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Youvision\\ThinkResponse\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "think": {
+      "services": [
+        "Youvision\\ThinkResponse\\Service"
+      ],
+      "config": {
+        "response": "config/response.php"
+      }
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
