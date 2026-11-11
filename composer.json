@@ -1,5 +1,15 @@
 {
   "name": "youvision/think-response",
+  "authors": [
+    {
+      "name": "indiboy-create",
+      "homepage": "https://github.com/indiboy-create"
+    },
+    {
+      "name": "AI",
+      "role": "Developer"
+    }
+  ],
   "description": "为 ThinkPHP 8 API 项目提供规范统一的响应数据结构",
   "type": "library",
   "license": "Apache-2.0",
