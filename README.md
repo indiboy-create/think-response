@@ -1,8 +1,3 @@
-## ThinkPHP-PanGu - 盘古ThinkPHP开源索引!
-面向 ThinkPHP 的开源工程索引：组件、框架、服务与发布工具，按能力组织，持续整理。
-仓库地址：**<https://github.com/indiboy-create/ThinkPHP-PanGu/>**
-在线站点：**<https://indiboy-create.github.io/ThinkPHP-PanGu/>**
-
 # think-response
 
 为 ThinkPHP 8 API 项目提供规范统一的响应数据结构。
@@ -15,13 +10,15 @@
 - 支持模型、集合、数组、分页数据
 - 支持字段隐藏、字段别名（例如 `message` 改为 `msg`、分页内层 `data.data` 改为 `data.list`）
 - 支持业务码多语言消息
+- 基于 `youvision/think-enum` 的 `HttpStatusCode` 枚举管理 HTTP 状态码，支持语言包覆盖状态描述
 - 内置统一异常处理，可自动接管 ThinkPHP 默认异常处理器
 - 兼容 ThinkPHP 8 的 Facade 与服务自动发现
 
 ## 环境
 
-- PHP >= 8.0
+- PHP >= 8.1
 - ThinkPHP 8
+- youvision/think-enum ^1.0（安装时自动引入）
 
 ## 安装
 
@@ -216,6 +213,22 @@ return [
 return Response::localize(200101);
 ```
 
+### HTTP 状态码描述
+
+HTTP 状态码由 `youvision/think-enum` 的 `youvision\enum\think\support\enums\HttpStatusCode` 枚举统一校验。内置中文描述优先；未内置的状态码（如 `402`、`418`）可以在应用语言包中补充，键名为「枚举类名（小写）+ 状态码」：
+
+```php
+// app/lang/zh-cn.php（需 config/lang.php 开启 allow_group）
+return [
+    'youvision\enum\think\support\enums\httpstatuscode' => [
+        402 => '需要付款',
+        418 => '我是茶壶',
+    ],
+];
+```
+
+未配置语言包时使用 `config/response.php` 的 `default_message` 兜底。
+
 ## 异常处理
 
 包内置的异常处理器会在以下情况返回统一 JSON：
@@ -301,6 +314,11 @@ class ExceptionHandle extends ResponseHandle
 // 所有失败响应返回 HTTP 500
 'error_code' => 500,
 ```
+
+## ThinkPHP-PanGu - 盘古ThinkPHP开源索引!
+面向 ThinkPHP 的开源工程索引：组件、框架、服务与发布工具，按能力组织，持续整理。
+- 仓库地址：**<https://github.com/indiboy-create/ThinkPHP-PanGu/>**
+- 在线站点：**<https://indiboy-create.github.io/ThinkPHP-PanGu/>**
 
 ## 许可
 

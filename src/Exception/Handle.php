@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Youvision\ThinkResponse\Exception;
 
-
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\exception\Handle as BaseHandle;
@@ -16,10 +15,10 @@ use think\Response as ThinkResponse;
 use Throwable;
 use Youvision\ThinkResponse\Response;
 use Youvision\ThinkResponse\Support\Status;
+use youvision\enum\think\support\enums\HttpStatusCode;
 
 class Handle extends BaseHandle
 {
-
     public function render($request, Throwable $e): ThinkResponse
     {
         if ($e instanceof HttpResponseException) {
@@ -58,7 +57,7 @@ class Handle extends BaseHandle
         $debug   = $this->debugEnabled();
         $headers = [];
         $errors  = null;
-        $code    = 500;
+        $code    = HttpStatusCode::HTTP_INTERNAL_SERVER_ERROR->value;
         $message = '';
         $expose  = false;
 
@@ -68,7 +67,7 @@ class Handle extends BaseHandle
             $expose  = true;
             $headers = $e->getHeaders();
         } elseif (($options = $this->matchException($e)) !== null) {
-            $code    = (int) ($options['code'] ?? 500);
+            $code    = (int) ($options['code'] ?? HttpStatusCode::HTTP_INTERNAL_SERVER_ERROR->value);
             $message = (string) ($options['message'] ?? '');
             $expose  = (bool) ($options['expose'] ?? false);
         } else {

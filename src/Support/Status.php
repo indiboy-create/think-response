@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Youvision\ThinkResponse\Support;
 
+use think\facade\Lang;
+use Throwable;
+use youvision\enum\think\support\enums\HttpStatusCode;
+
 final class Status
 {
     public const MESSAGES = [
@@ -36,14 +40,31 @@ final class Status
 
     public static function message(int $code, string $default = ''): string
     {
-        return self::MESSAGES[$code] ?? ($default !== '' ? $default : '请求处理失败');
+        if (isset(self::MESSAGES[$code])) {
+            return self::MESSAGES[$code];
+        }
+
+        if (HttpStatusCode::tryFrom($code) !== null) {
+            $key = HttpStatusCode::class . '.' . $code;
+            try {
+                $message = Lang::get($key);
+                if (is_string($message) && $message !== '' && $message !== $key) {
+                    return $message;
+                }
+            } catch (Throwable) {
+            }
+        }
+
+        return $default !== '' ? $default : '请求处理失败';
     }
 
     public static function httpPrefix(int $code): int
     {
         $prefix = (int) substr((string) $code, 0, 3);
 
-        return $prefix >= 100 && $prefix <= 599 ? $prefix : 500;
+        return HttpStatusCode::tryFrom($prefix) !== null
+            ? $prefix
+            : HttpStatusCode::HTTP_INTERNAL_SERVER_ERROR->value;
     }
 
     public static function businessStatus(int $code): string
@@ -51,9 +72,9 @@ final class Status
         $prefix = self::httpPrefix($code);
 
         return match (true) {
-            $prefix >= 400 && $prefix <= 499 => 'error',
-            $prefix >= 500 && $prefix <= 599 => 'fail',
-            default                          => 'success',
+            $prefix >= HttpStatusCode::HTTP_BAD_REQUEST->value && $prefix < HttpStatusCode::HTTP_INTERNAL_SERVER_ERROR->value => 'error',
+            $prefix >= HttpStatusCode::HTTP_INTERNAL_SERVER_ERROR->value                                                  => 'fail',
+            default                                                                                                        => 'success',
         };
     }
 }

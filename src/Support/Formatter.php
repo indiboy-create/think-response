@@ -11,6 +11,7 @@ use think\Paginator;
 use think\Response as ThinkResponse;
 use Throwable;
 use Youvision\ThinkResponse\Contracts\Formatter as FormatterContract;
+use youvision\enum\think\support\enums\HttpStatusCode;
 
 class Formatter implements FormatterContract
 {
@@ -78,7 +79,10 @@ class Formatter implements FormatterContract
         if ($failed) {
             $errorCode = (int) ($this->config['error_code'] ?? 0);
 
-            if (in_array($errorCode, [200, 500], true)) {
+            if (in_array($errorCode, [
+                HttpStatusCode::HTTP_OK->value,
+                HttpStatusCode::HTTP_INTERNAL_SERVER_ERROR->value,
+            ], true)) {
                 return $errorCode;
             }
         }
@@ -100,23 +104,16 @@ class Formatter implements FormatterContract
 
         $messages = (array) ($this->config['messages'] ?? []);
 
-        foreach ([$code, (string) $code] as $key) {
-            if (isset($messages[$key]) && is_string($messages[$key]) && $messages[$key] !== '') {
-                return $messages[$key];
-            }
-        }
-
-        $httpStatus = Status::httpPrefix($code);
-
-        if (isset(Status::MESSAGES[$httpStatus])) {
-            return Status::MESSAGES[$httpStatus];
+        if (isset($messages[$code]) && is_string($messages[$code]) && $messages[$code] !== '') {
+            return $messages[$code];
         }
 
         $defaults = (array) ($this->config['default_message'] ?? []);
-
-        return $failed
+        $default  = $failed
             ? (string) ($defaults['fail'] ?? '操作失败')
             : (string) ($defaults['success'] ?? '操作成功');
+
+        return Status::message(Status::httpPrefix($code), $default);
     }
 
     protected function langMessage(int $code): ?string
@@ -131,12 +128,9 @@ class Formatter implements FormatterContract
 
         foreach ($keys as $key) {
             try {
-                if (Lang::has($key)) {
-                    $message = Lang::get($key);
-
-                    if (is_string($message) && $message !== '') {
-                        return $message;
-                    }
+                $message = Lang::get($key);
+                if (is_string($message) && $message !== '' && $message !== $key) {
+                    return $message;
                 }
             } catch (Throwable) {
             }
